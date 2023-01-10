@@ -1,27 +1,3 @@
-# PLAYWRIGHT
-
-## Links
-
-- [Playwright Docs](https://playwright.dev/docs/intro)
-
-## Init Playwright
-
-Init `Playwright`
-
-```Bash
-npm init playwright
-```
-
-## Docs
-
-### Globally Available
-
-In `Playwright` we have some globally available fixtures, like:
-
-- `browser`
-- `page`
-
-```JavaScript
 import { test } from '@playwright/test';
 
 describe('Playwright Basics', () => {
@@ -39,5 +15,3 @@ describe('Playwright Basics', () => {
         await page.goto('https://rogertakeshita.com');
     });
 });
-
-```
