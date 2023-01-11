@@ -75,7 +75,89 @@ test('Browser Context-Validating - Should Return Array of Products, Wait HTML To
     await page.locator("[type='password']").fill('learning');
 
     // Wait until page change
-    await Promise.all([page.waitForNavigation(), page.locator('#signInBtn').click()]);
+    await Promise.all([page.locator('#signInBtn').click(), page.waitForNavigation()]);
     const titles = await page.locator('.card-body a').allTextContents();
     log(titles);
+});
+
+test('UI Controls - Dropdown', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
+
+    await page.locator('select.form-control').selectOption('consult');
+});
+
+test('UI Controls - Radio Button - Should Pass', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
+
+    const userRadio = page.locator('.radiotextsty').last();
+
+    await page.locator('select.form-control').selectOption('consult');
+    await userRadio.click();
+    await page.locator('#okayBtn').click();
+    await expect(userRadio).toBeChecked();
+    const isChecked = await userRadio.isChecked();
+    log(isChecked ? 'User Radio Is Checked' : 'User Radio Is NOT Checked');
+});
+
+test('UI Controls - Radio Button - Should Fail', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
+
+    const userRadio = page.locator('.radiotextsty').last();
+
+    await expect(userRadio).not.toBeChecked();
+    const isChecked = await userRadio.isChecked();
+    log(isChecked ? 'User Radio Is Checked' : 'User Radio Is NOT Checked');
+});
+
+test('UI Controls - Checkbox - Should Pass', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
+
+    const userRadio = page.locator('.radiotextsty').last();
+    const termsBox = page.locator('#terms');
+
+    await page.locator('select.form-control').selectOption('consult');
+    await userRadio.click();
+    await page.locator('#okayBtn').click();
+    await expect(userRadio).toBeChecked();
+    await termsBox.click();
+    await expect(termsBox).toBeChecked();
+    await termsBox.uncheck();
+    await expect(termsBox).not.toBeChecked();
+    const isChecked = await termsBox.isChecked();
+    await expect(isChecked).toBeFalsy();
+});
+
+test('UI Controls - Check Attribute Value - Should Pass', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
+
+    const blinkingEl = page.locator('[href*="documents-request"]');
+    await expect(blinkingEl).toHaveAttribute('class', 'blinkingText');
+});
+
+test('UI Controls - Child Window/Tab - Should Pass', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
+
+    const blinkingEl = page.locator('[href*="documents-request"]');
+    const [_, newPage] = await Promise.all([blinkingEl.click(), context.waitForEvent('page')]);
+    const text = await newPage.locator('.red').textContent();
+    const domain = text.split('@')[1].split(' ')[0];
+    await page.locator('#username').fill(domain);
 });
