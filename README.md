@@ -26,6 +26,8 @@
       - [Polling](#polling)
       - [Retrying](#retrying)
     - [Child Window/Tab](#child-windowtab)
+    - [Codegen](#codegen)
+    - [Traces](#traces)
 
 ---
 
@@ -64,6 +66,7 @@ test('Custom Playwright context', async ({ browser }) => {
     const page = await context.newPage();
     // Go to page
     await page.goto('https://rogertakeshita.com');
+    await context.close();
 });
 
 test('Default context', async ({ page }) => {
@@ -286,27 +289,29 @@ test('UI Controls - Dropdown', async ({ browser }) => {
     await page.goto('https://rahulshettyacademy.com/loginpagePractise');
 
     await page.locator('select.form-control').selectOption('consult');
+    await context.close();
 });
 ```
 
 #### Radio Button
 
 ```JavaScript
-  test.only('UI Controls - Radio Button - Should Pass', async ({ browser }) => {
-      const context = await browser.newContext();
-      const page = await context.newPage();
+test.only('UI Controls - Radio Button - Should Pass', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
 
-      await page.goto('https://rahulshettyacademy.com/loginpagePractise');
+    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
 
-      const userRadio = page.locator('.radiotextsty').last();
+    const userRadio = page.locator('.radiotextsty').last();
 
-      await page.locator('select.form-control').selectOption('consult');
-      await userRadio.click();
-      await page.locator('#okayBtn').click();
-      await expect(userRadio).toBeChecked();
-      const isChecked = await userRadio.isChecked();
-      log(isChecked ? 'User Radio Is Checked' : 'User Radio Is NOT Checked');
-  });
+    await page.locator('select.form-control').selectOption('consult');
+    await userRadio.click();
+    await page.locator('#okayBtn').click();
+    await expect(userRadio).toBeChecked();
+    const isChecked = await userRadio.isChecked();
+    log(isChecked ? 'User Radio Is Checked' : 'User Radio Is NOT Checked');
+    await context.close();
+});
 ```
 
 #### Checkbox
@@ -331,6 +336,7 @@ test.only('UI Controls - Checkbox - Should Pass', async ({ browser }) => {
     await expect(termsBox).not.toBeChecked();
     const isChecked = await termsBox.isChecked();
     await expect(isChecked).toBeFalsy();
+    await context.close();
 });
 ```
 
@@ -345,6 +351,7 @@ test.only('UI Controls - Check Attribute Value - Should Pass', async ({ browser 
 
     const blinkingEl = page.locator('[href*="documents-request"]');
     await expect(blinkingEl).toHaveAttribute('class', 'blinkingText');
+    await context.close();
 });
 ```
 
@@ -367,6 +374,7 @@ test('Browser Context-Validating - Should Return Array of Products, Wait For API
     await page.waitForLoadState('networkidle');
     const titles = await page.locator('.card-body b').allTextContents();
     log(titles);
+    await context.close();
 });
 ```
 
@@ -386,6 +394,7 @@ test('Browser Context-Validating - Should Return Array of Products, Wait HTML To
     await Promise.all([page.locator('#signInBtn').click(), page.waitForNavigation()]);
     const titles = await page.locator('.card-body a').allTextContents();
     log(titles);
+    await context.close();
 });
 ```
 
@@ -561,16 +570,83 @@ await expect(async () => {
 
 ### Child Window/Tab
 
-    ```JavaScript
-    test.only('UI Controls - Child Window/Tab - Should Pass', async ({ browser }) => {
-        const context = await browser.newContext();
-        const page = await context.newPage();
+```JavaScript
+test.only('UI Controls - Child Window/Tab - Should Pass', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
 
-        await page.goto('https://rahulshettyacademy.com/loginpagePractise');
+    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
 
-        const blinkingEl = page.locator('[href*="documents-request"]');
-        const [_, newPage] = await Promise.all([blinkingEl.click(), context.waitForEvent('page')]);
-        const text = await newPage.locator('.red').textContent();
-        log(text);
-    });
-    ```
+    const blinkingEl = page.locator('[href*="documents-request"]');
+    const [_, newPage] = await Promise.all([blinkingEl.click(), context.waitForEvent('page')]);
+    const text = await newPage.locator('.red').textContent();
+    log(text);
+    await context.close();
+});
+```
+
+### Codegen
+
+```Bash
+npx playwright codegen https://rogertakeshita.com
+```
+
+```JavaScript
+test('test', async ({ page }) => {
+    await page.goto('https://www.rogertakeshita.com/');
+    const page1Promise = page.waitForEvent('popup');
+    await page.getByText('NPM - gh-pullProject InfoLive ProjectGitHub').click();
+    const page1 = await page1Promise;
+    const page2Promise = page1.waitForEvent('popup');
+    await page1.getByRole('link', { name: 'Repository github.com/Roger-Takeshita/gh-pull' }).click();
+    const page2 = await page2Promise;
+    await page.getByPlaceholder('Your Name (Required)').click();
+    await page.getByPlaceholder('Your Name (Required)').fill('roger@codegen.com');
+    await page.getByPlaceholder('Your Name (Required)').press('Tab');
+    await page.getByPlaceholder('Your Email (Required)').press('Shift+Tab');
+    await page.getByPlaceholder('Your Name (Required)').press('Meta+x');
+    await page.getByPlaceholder('Your Name (Required)').fill('Roger Test');
+    await page.getByPlaceholder('Your Name (Required)').press('Tab');
+    await page.getByPlaceholder('Your Email (Required)').fill('roger@codegen.com');
+    await page.getByPlaceholder('Your Message...').click();
+    await page.getByPlaceholder('Your Message...').fill('Testing from codegen');
+    await page.getByRole('button', { name: 'Send' }).click();
+    await context.close();
+});
+```
+
+### Traces
+
+We can enable traces and screenshots in the `playwright.config.js`
+
+```JavaScript
+// @ts-check
+const { devices } = require('@playwright/test');
+
+const config = {
+    testDir: './tests',
+    timeout: 30 * 1000,
+    expect: {
+        timeout: 5000,
+    },
+    reporter: 'html',
+    use: {
+        browserName: 'chromium',
+        // browserName: 'firefox',
+        // browserName: 'webkit', // Safari
+        headless: false,
+        screenshot: 'on',
+        trace: 'retain-on-failure',
+    },
+};
+
+module.exports = config;
+```
+
+To preview and inspect a trace.
+
+![](/assets/images/2023-01-11-12-11-16.png)
+
+![](/assets/images/2023-01-11-12-19-57.png)
+
+![](/assets/images/2023-01-11-12-16-41.png)

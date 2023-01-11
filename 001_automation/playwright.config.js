@@ -10,9 +10,11 @@ const config = {
     reporter: 'html',
     use: {
         browserName: 'chromium',
-        headless: false,
         // browserName: 'firefox',
         // browserName: 'webkit', // Safari
+        headless: false,
+        screenshot: 'on',
+        trace: 'retain-on-failure',
     },
 };
 

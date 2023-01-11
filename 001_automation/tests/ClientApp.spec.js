@@ -13,4 +13,6 @@ test('Browser Context-Validating - Should Return Array of Products, Wait For API
     await page.waitForLoadState('networkidle');
     const titles = await page.locator('.card-body b').allTextContents();
     log(titles);
+    await context.close();
+    await browser.close();
 });
