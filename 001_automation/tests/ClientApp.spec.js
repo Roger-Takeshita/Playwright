@@ -42,7 +42,7 @@ test('E2E - Test 1', async ({ browser }) => {
     await context.close();
 });
 
-test.only('E2E - Test 2', async ({ browser }) => {
+test('E2E - Test 2', async ({ browser }) => {
     const product1 = 'adidas original';
     const { page, context } = await newPageFromBrowser(browser);
     await page.goto('https://rahulshettyacademy.com/client');

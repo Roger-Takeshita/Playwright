@@ -8,6 +8,9 @@
   - [Run tests](#run-tests)
   - [Docs](#docs)
     - [Inspector / Pause](#inspector--pause)
+    - [Page](#page)
+      - [Go Back](#go-back)
+      - [Go Forward](#go-forward)
     - [Auto-waiting](#auto-waiting)
     - [Locators](#locators)
       - [Chaining](#chaining)
@@ -19,6 +22,9 @@
       - [Check If an Element Has an Attribute](#check-if-an-element-has-an-attribute)
       - [Text](#text)
       - [Tag Name (`has-text`)](#tag-name-has-text)
+      - [Popup / Dialog](#popup--dialog)
+      - [Hover](#hover)
+      - [iFrame](#iframe)
     - [Wait API / HTML](#wait-api--html)
       - [Wait For API To Idle](#wait-for-api-to-idle)
       - [Wait For HTML To Load](#wait-for-html-to-load)
@@ -96,9 +102,11 @@ const config = {
     reporter: 'html',
     use: {
         browserName: 'chromium',
-        headless: false,
         // browserName: 'firefox',
         // browserName: 'webkit', // Safari
+        headless: false,
+        screenshot: 'on',
+        trace: 'retain-on-failure',
     },
 };
 
@@ -126,6 +134,22 @@ await page.pause();
 ```
 
 This command will pause the `Playwright` execution. Like a debugger breakpoint
+
+---
+
+### Page
+
+#### Go Back
+
+```JavaScript
+await page.goBack();
+```
+
+#### Go Forward
+
+```JavaScript
+await page.gotForward();
+```
 
 ---
 
@@ -300,98 +324,48 @@ await page.locator('#name');
 #### Dropdown
 
 ```JavaScript
-test('UI Controls - Dropdown', async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
+await page.locator('select.form-control').selectOption('consult');
+```
 
-    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
-
-    await page.locator('select.form-control').selectOption('consult');
-    await context.close();
-});
+```JavaScript
+await page.locator('.input.ddl').nth(0).click();
+await page.locator('.input.ddl').nth(0).selectOption({ index: 5 });
+await page.locator('.input.ddl').nth(1).click();
+await page.locator('.input.ddl').nth(1).selectOption({ index: 22 });
 ```
 
 #### Radio Button
 
 ```JavaScript
-test.only('UI Controls - Radio Button - Should Pass', async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
+const userRadio = page.locator('.radiotextsty').last();
 
-    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
-
-    const userRadio = page.locator('.radiotextsty').last();
-
-    await page.locator('select.form-control').selectOption('consult');
-    await userRadio.click();
-    await page.locator('#okayBtn').click();
-    await expect(userRadio).toBeChecked();
-    const isChecked = await userRadio.isChecked();
-    log(isChecked ? 'User Radio Is Checked' : 'User Radio Is NOT Checked');
-    await context.close();
-});
+await userRadio.click();
+await expect(userRadio).toBeChecked();
+const isChecked = await userRadio.isChecked();
+log(isChecked ? 'User Radio Is Checked' : 'User Radio Is NOT Checked');
 ```
 
 #### Checkbox
 
 ```JavaScript
-test.only('UI Controls - Checkbox - Should Pass', async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
+const termsBox = page.locator('#terms');
 
-    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
-
-    const userRadio = page.locator('.radiotextsty').last();
-    const termsBox = page.locator('#terms');
-
-    await page.locator('select.form-control').selectOption('consult');
-    await userRadio.click();
-    await page.locator('#okayBtn').click();
-    await expect(userRadio).toBeChecked();
-    await termsBox.click();
-    await expect(termsBox).toBeChecked();
-    await termsBox.uncheck();
-    await expect(termsBox).not.toBeChecked();
-    const isChecked = await termsBox.isChecked();
-    await expect(isChecked).toBeFalsy();
-    await context.close();
-});
+await termsBox.click();
+await expect(termsBox).toBeChecked();
+await termsBox.uncheck();
+await expect(termsBox).not.toBeChecked();
+const isChecked = await termsBox.isChecked();
+await expect(isChecked).toBeFalsy();
 ```
 
 #### Check If an Element Has an Attribute
 
 ```JavaScript
-test.only('UI Controls - Check Attribute Value - Should Pass', async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
-    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
-
-    const blinkingEl = page.locator('[href*="documents-request"]');
-    await expect(blinkingEl).toHaveAttribute('class', 'blinkingText');
-    await context.close();
-});
+const blinkingEl = page.locator('[href*="documents-request"]');
+await expect(blinkingEl).toHaveAttribute('class', 'blinkingText');
 ```
 
 #### Text
-
-```JavaScript
-test.only('E2E - Test 1', async ({ browser }) => {
-    const item = 'adidas original';
-    const { page, context } = await newPageFromBrowser(browser);
-    await page.goto('https://rahulshettyacademy.com/client');
-
-    await page.locator('#userEmail').fill(email);
-    await page.locator('#userPassword').fill(password);
-    await page.locator('[value="Login"]').click();
-    await page.waitForLoadState('networkidle');
-    const titles = await page.locator('.card-body b').allTextContents();
-    const idx = titles.findIndex((title) => title.includes(item));
-    await page.locator('.card-body').nth(idx).locator('text= Add To Cart').click();
-    await page.pause();
-    await context.close();
-});
-```
 
 ```JavaScript
 const titles = await page.locator('.card-body b').allTextContents();
@@ -407,27 +381,57 @@ await expect(successMsg).toHaveText('Thankyou for the order.');
 #### Tag Name (`has-text`)
 
 ```JavaScript
-test.only('E2E - Test 1', async ({ browser }) => {
-    const product1 = 'adidas original';
-    const product2 = 'qwerty';
-    const { page, context } = await newPageFromBrowser(browser);
-    await page.goto('https://rahulshettyacademy.com/client');
+await page.locator('.cart li').last().waitFor();
+const exists = await page.locator(`h3:has-text('${product1}')`).isVisible();
+await expect(exists).toBeTruthy();
+```
 
-    await page.locator('#userEmail').fill(email);
-    await page.locator('#userPassword').fill(password);
-    await page.locator('[value="Login"]').click();
-    await page.waitForLoadState('networkidle');
-    const titles = await page.locator('.card-body b').allTextContents();
+#### Popup / Dialog
 
-    const idx1 = titles.findIndex((title) => title.includes(product1));
-    await page.locator('.card-body').nth(idx1).locator('text= Add To Cart').click();
+There is the `on` method, that will listen for events
 
-    const idx2 = titles.findIndex((title) => title.includes(product2));
-    await page.locator('.card-body').nth(idx2).locator('text= Add To Cart').click();
+We can listen for a JS event `dialog`, and whenever this event is trigged, then it will execute the defined action.
 
-    await page.locator('[routerlink="/dashboard/cart"]').click();
-    await context.close();
-});
+- Click on `Ok`
+
+  ```JavaScript
+  // Will listen for `dialog` event
+  page.on('dialog', (dialog) => {
+      dialog.accept();
+  });
+
+  // Triggers the dialog/popup event
+  await page.locator('#confirmbtn').click();
+  ```
+
+- Click on `Cancel`
+
+  ```JavaScript
+  // Will listen for `dialog` event
+  page.on('dialog', (dialog) => {
+      dialog.dismiss();
+  });
+
+  // Triggers the dialog/popup event
+  await page.locator('#confirmbtn').click();
+  ```
+
+#### Hover
+
+```JavaScript
+await page.locator('#mousehover').hover();
+await page.locator('[href="#top"]').click();
+```
+
+#### iFrame
+
+```JavaScript
+await page.keyboard.down('End');
+const framePage = await page.frameLocator('#courses-iframe');
+await framePage.locator('li a[href="lifetime-access"]:visible').click();
+const text = await framePage.locator('.text h2').textContent();
+const subscriberNumber = text.split(' ')[1].replace(',', '');
+expect(subscriberNumber).toBe('13522');
 ```
 
 ---
@@ -437,67 +441,24 @@ test.only('E2E - Test 1', async ({ browser }) => {
 #### Wait For API To Idle
 
 ```JavaScript
-test('Browser Context-Validating - Should Return Array of Products, Wait For API To Idle', async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
-    await page.goto('https://rahulshettyacademy.com/client');
-
-    await page.locator('#userEmail').fill('anshika@gmail.com');
-    await page.locator('#userPassword').fill('Iamking@000');
-    await page.locator('[value="Login"]').click();
-    await page.waitForLoadState('networkidle');
-    const titles = await page.locator('.card-body b').allTextContents();
-    log(titles);
-    await context.close();
-});
+await page.waitForLoadState('networkidle');
+const titles = await page.locator('.card-body b').allTextContents();
 ```
 
 #### Wait For HTML To Load
 
 ```JavaScript
-test('Browser Context-Validating - Should Return Array of Products, Wait HTML To Load', async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
-    await page.goto('https://rahulshettyacademy.com/loginpagePractise');
-
-    await page.locator('#username').fill('rahulshettyacademy');
-    await page.locator("[type='password']").fill('learning');
-
-    // Wait until page change
-    await Promise.all([page.locator('#signInBtn').click(), page.waitForNavigation()]);
-    const titles = await page.locator('.card-body a').allTextContents();
-    log(titles);
-    await context.close();
-});
+// Wait until page change
+await Promise.all([page.locator('#signInBtn').click(), page.waitForNavigation()]);
+const titles = await page.locator('.card-body a').allTextContents();
 ```
 
 #### Wait For Element To Load
 
 ```JavaScript
-test.only('E2E - Test 1', async ({ browser }) => {
-    const product1 = 'adidas original';
-    const product2 = 'qwerty';
-    const { page, context } = await newPageFromBrowser(browser);
-    await page.goto('https://rahulshettyacademy.com/client');
-
-    await page.locator('#userEmail').fill(email);
-    await page.locator('#userPassword').fill(password);
-    await page.locator('[value="Login"]').click();
-    await page.waitForLoadState('networkidle');
-    const titles = await page.locator('.card-body b').allTextContents();
-    const idx1 = titles.findIndex((title) => title.includes(product1));
-    await page.locator('.card-body').nth(idx1).locator('text= Add To Cart').click();
-    const idx2 = titles.findIndex((title) => title.includes(product2));
-    await page.locator('.card-body').nth(idx2).locator('text= Add To Cart').click();
-    await page.locator('[routerlink="/dashboard/cart"]').click();
-
-    await page.locator('.cart li').last().waitFor();
-    const exists = await page.locator(`h3:has-text('${product1}')`).isVisible();
-    await expect(exists).toBeTruthy();
-    await context.close();
-});
+await page.locator('.cart li').last().waitFor();
+const exists = await page.locator(`h3:has-text('${product1}')`).isVisible();
+await expect(exists).toBeTruthy();
 ```
 
 ---
@@ -673,7 +634,7 @@ await expect(async () => {
 ### Child Window/Tab
 
 ```JavaScript
-test.only('UI Controls - Child Window/Tab - Should Pass', async ({ browser }) => {
+test('UI Controls - Child Window/Tab - Should Pass', async ({ browser }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
 
