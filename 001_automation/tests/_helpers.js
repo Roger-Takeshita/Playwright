@@ -25,8 +25,22 @@ const toTitleCase = (str = '') => {
         .trim();
 };
 
+const newPageFromBrowser = async (browser) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    return { page, context };
+};
+
+const newPageFromContext = async (context) => {
+    const page = await context.newPage();
+    return page;
+};
+
 module.exports = {
     delay,
     log,
     toTitleCase,
+    newPageFromBrowser,
+    newPageFromContext,
 };

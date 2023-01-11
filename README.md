@@ -9,15 +9,20 @@
   - [Docs](#docs)
     - [Inspector / Pause](#inspector--pause)
     - [Auto-waiting](#auto-waiting)
+    - [Locators](#locators)
+      - [Chaining](#chaining)
     - [Selectors](#selectors)
       - [CSS Selectors](#css-selectors)
       - [Dropdown](#dropdown)
       - [Radio Button](#radio-button)
       - [Checkbox](#checkbox)
       - [Check If an Element Has an Attribute](#check-if-an-element-has-an-attribute)
+      - [Text](#text)
+      - [Tag Name (`has-text`)](#tag-name-has-text)
     - [Wait API / HTML](#wait-api--html)
       - [Wait For API To Idle](#wait-for-api-to-idle)
       - [Wait For HTML To Load](#wait-for-html-to-load)
+      - [Wait For Element To Load](#wait-for-element-to-load)
     - [Assertions](#assertions)
       - [List of Assertions](#list-of-assertions)
       - [Negating Matchers](#negating-matchers)
@@ -239,6 +244,19 @@ test('default context - expect page title to be Roger Takeshita', async ({ page 
 
 ---
 
+### Locators
+
+#### Chaining
+
+```JavaScript
+await page.locator('button[type="button"]').nth(1).locator('text=Checkout').click();
+//                             ^              ^                  ^             ^
+//                             |              |                  |             └── Action
+//                             |              |                  └── Text attribute
+//                             |              └── Return second item
+//                             └── Return an array of buttons
+```
+
 ### Selectors
 
 ```JavaScript
@@ -355,6 +373,63 @@ test.only('UI Controls - Check Attribute Value - Should Pass', async ({ browser 
 });
 ```
 
+#### Text
+
+```JavaScript
+test.only('E2E - Test 1', async ({ browser }) => {
+    const item = 'adidas original';
+    const { page, context } = await newPageFromBrowser(browser);
+    await page.goto('https://rahulshettyacademy.com/client');
+
+    await page.locator('#userEmail').fill(email);
+    await page.locator('#userPassword').fill(password);
+    await page.locator('[value="Login"]').click();
+    await page.waitForLoadState('networkidle');
+    const titles = await page.locator('.card-body b').allTextContents();
+    const idx = titles.findIndex((title) => title.includes(item));
+    await page.locator('.card-body').nth(idx).locator('text= Add To Cart').click();
+    await page.pause();
+    await context.close();
+});
+```
+
+```JavaScript
+const titles = await page.locator('.card-body b').allTextContents();
+const idx = titles.findIndex((title) => title.includes(item));
+await page.locator('.card-body').nth(idx).locator('text= Add To Cart').click();
+```
+
+```JavaScript
+const successMsg = await page.locator('.hero-primary');
+await expect(successMsg).toHaveText('Thankyou for the order.');
+```
+
+#### Tag Name (`has-text`)
+
+```JavaScript
+test.only('E2E - Test 1', async ({ browser }) => {
+    const product1 = 'adidas original';
+    const product2 = 'qwerty';
+    const { page, context } = await newPageFromBrowser(browser);
+    await page.goto('https://rahulshettyacademy.com/client');
+
+    await page.locator('#userEmail').fill(email);
+    await page.locator('#userPassword').fill(password);
+    await page.locator('[value="Login"]').click();
+    await page.waitForLoadState('networkidle');
+    const titles = await page.locator('.card-body b').allTextContents();
+
+    const idx1 = titles.findIndex((title) => title.includes(product1));
+    await page.locator('.card-body').nth(idx1).locator('text= Add To Cart').click();
+
+    const idx2 = titles.findIndex((title) => title.includes(product2));
+    await page.locator('.card-body').nth(idx2).locator('text= Add To Cart').click();
+
+    await page.locator('[routerlink="/dashboard/cart"]').click();
+    await context.close();
+});
+```
+
 ---
 
 ### Wait API / HTML
@@ -394,6 +469,33 @@ test('Browser Context-Validating - Should Return Array of Products, Wait HTML To
     await Promise.all([page.locator('#signInBtn').click(), page.waitForNavigation()]);
     const titles = await page.locator('.card-body a').allTextContents();
     log(titles);
+    await context.close();
+});
+```
+
+#### Wait For Element To Load
+
+```JavaScript
+test.only('E2E - Test 1', async ({ browser }) => {
+    const product1 = 'adidas original';
+    const product2 = 'qwerty';
+    const { page, context } = await newPageFromBrowser(browser);
+    await page.goto('https://rahulshettyacademy.com/client');
+
+    await page.locator('#userEmail').fill(email);
+    await page.locator('#userPassword').fill(password);
+    await page.locator('[value="Login"]').click();
+    await page.waitForLoadState('networkidle');
+    const titles = await page.locator('.card-body b').allTextContents();
+    const idx1 = titles.findIndex((title) => title.includes(product1));
+    await page.locator('.card-body').nth(idx1).locator('text= Add To Cart').click();
+    const idx2 = titles.findIndex((title) => title.includes(product2));
+    await page.locator('.card-body').nth(idx2).locator('text= Add To Cart').click();
+    await page.locator('[routerlink="/dashboard/cart"]').click();
+
+    await page.locator('.cart li').last().waitFor();
+    const exists = await page.locator(`h3:has-text('${product1}')`).isVisible();
+    await expect(exists).toBeTruthy();
     await context.close();
 });
 ```
