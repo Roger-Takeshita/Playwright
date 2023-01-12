@@ -57,7 +57,7 @@ const getData = async (url, token) => {
     const apiContext = await request.newContext();
     const response = await apiContext.get(url, options);
     if (!response.ok()) console.error({ response });
-    await expect(response.ok()).toBeTruthy();
+    expect(response.ok()).toBeTruthy();
 
     return response.json();
 };
@@ -75,24 +75,27 @@ const postData = async (url, token, data) => {
     const apiContext = await request.newContext();
     const response = await apiContext.post(url, options);
     if (!response.ok()) console.error({ response });
-    await expect(response.ok()).toBeTruthy();
+    expect(response.ok()).toBeTruthy();
 
     return response.json();
 };
 
-class ApiUtils {
-    constructor(apiContext) {
-        if (ApiUtils._instance) return ApiUtils._instance;
-        ApiUtils._instance = this;
+class Request {
+    constructor(apiContext, email, password) {
+        if (Request._instance) return Request._instance;
+        Request._instance = this;
 
         this.apiContext = apiContext;
+        this.email = email;
+        this.password = password;
+        this.userId;
         this.token;
         this.options;
     }
 
     async login() {
-        const email = 'anshika@gmail.com';
-        const password = 'Iamking@000';
+        const email = this.email || 'anshika@gmail.com';
+        const password = this.password || 'Iamking@000';
         const url = 'https://rahulshettyacademy.com/api/ecom/auth/login';
         const data = {
             userEmail: email,
@@ -100,9 +103,10 @@ class ApiUtils {
         };
 
         const loginResponse = await this.apiContext.post(url, { data });
-        const { token } = await loginResponse.json();
+        const { token = '', userId = '' } = await loginResponse.json();
 
         this.token = token;
+        this.userId = userId;
         this.options = {
             headers: {
                 Authorization: token,
@@ -136,5 +140,5 @@ module.exports = {
     newPageFromContext,
     getData,
     postData,
-    ApiUtils,
+    Request,
 };

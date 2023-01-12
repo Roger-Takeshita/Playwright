@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test');
-const { newPageFromBrowser, ApiUtils } = require('./_helpers');
+const { newPageFromBrowser } = require('./_helpers');
 
 const email = 'anshika@gmail.com';
 const password = 'Iamking@000';
@@ -16,6 +16,7 @@ test.beforeAll(async ({ browser }) => {
     await page.waitForLoadState('networkidle');
     // Create a shareable file with all tokens / localStorage
     await context.storageState({ path: filename });
+    // Create a new context using storageState
     customContext = await browser.newContext({ storageState: filename });
     await page.close();
 });

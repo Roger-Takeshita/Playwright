@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test');
-const { delay, log, newPageFromBrowser } = require('./_helpers');
+const { log, newPageFromBrowser } = require('./_helpers');
 
 const email = 'anshika@gmail.com';
 const password = 'Iamking@000';
@@ -22,7 +22,7 @@ test('Browser Context-Validating - Should Return Array of Products, Wait For API
 test('E2E - Test 1', async ({ browser }) => {
     const product1 = 'adidas original';
     const product2 = 'qwerty';
-    const { page, context } = await newPageFromBrowser(browser);
+    const { page } = await newPageFromBrowser(browser);
     await page.goto('https://rahulshettyacademy.com/client');
 
     await page.locator('#userEmail').fill(email);
@@ -38,13 +38,13 @@ test('E2E - Test 1', async ({ browser }) => {
 
     await page.locator('.cart li').last().waitFor();
     const exists = await page.locator(`h3:has-text('${product1}')`).isVisible();
-    await expect(exists).toBeTruthy();
+    expect(exists).toBeTruthy();
     await page.close();
 });
 
 test('E2E - Test 2', async ({ browser }) => {
     const product1 = 'adidas original';
-    const { page, context } = await newPageFromBrowser(browser);
+    const { page } = await newPageFromBrowser(browser);
     await page.goto('https://rahulshettyacademy.com/client');
 
     // Login
@@ -59,7 +59,7 @@ test('E2E - Test 2', async ({ browser }) => {
     await page.locator('[routerlink="/dashboard/cart"]').click();
     await page.locator('.cart li').last().waitFor();
     const exists = await page.locator(`h3:has-text('${product1}')`).isVisible();
-    await expect(exists).toBeTruthy();
+    expect(exists).toBeTruthy();
     await page.locator('button[type="button"]').nth(1).locator('text=Checkout').click();
     // Checkout Page
     await page.locator('.row input').nth(0).fill('4242424242424242');

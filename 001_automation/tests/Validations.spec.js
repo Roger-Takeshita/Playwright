@@ -1,8 +1,8 @@
 const { test, expect } = require('@playwright/test');
-const { delay, log, newPageFromBrowser } = require('./_helpers');
+const { newPageFromBrowser } = require('./_helpers');
 
 test('Validations Test 1 - Dialog/Popup', async ({ browser }) => {
-    const { page, context } = await newPageFromBrowser(browser);
+    const { page } = await newPageFromBrowser(browser);
     await page.goto('https://rahulshettyacademy.com/AutomationPractice');
 
     const inputEl = await page.locator('.displayed-class');
@@ -18,7 +18,7 @@ test('Validations Test 1 - Dialog/Popup', async ({ browser }) => {
 });
 
 test('Validations Test 2 - Hover', async ({ browser }) => {
-    const { page, context } = await newPageFromBrowser(browser);
+    const { page } = await newPageFromBrowser(browser);
     await page.goto('https://rahulshettyacademy.com/AutomationPractice');
 
     await page.locator('#mousehover').hover();
@@ -28,7 +28,7 @@ test('Validations Test 2 - Hover', async ({ browser }) => {
 });
 
 test('Validations Test 3 - iFrame', async ({ browser }) => {
-    const { page, context } = await newPageFromBrowser(browser);
+    const { page } = await newPageFromBrowser(browser);
     await page.goto('https://rahulshettyacademy.com/AutomationPractice');
 
     await page.keyboard.down('End');

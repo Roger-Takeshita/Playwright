@@ -1,5 +1,4 @@
 const { test, expect } = require('@playwright/test');
-const { delay, log } = require('./_helpers');
 
 test('Custom Playwright context', async ({ browser }) => {
     // New browser instance
@@ -57,7 +56,7 @@ test('Gencode', async ({ browser }) => {
     const page1 = await page1Promise;
     const page2Promise = page1.waitForEvent('popup');
     await page1.getByRole('link', { name: 'Repository github.com/Roger-Takeshita/gh-pull' }).click();
-    const page2 = await page2Promise;
+    await page2Promise;
     await page.getByPlaceholder('Your Name (Required)').click();
     await page.getByPlaceholder('Your Name (Required)').fill('roger@codegen.com');
     await page.getByPlaceholder('Your Name (Required)').press('Tab');

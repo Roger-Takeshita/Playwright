@@ -10,6 +10,7 @@
     - [Debugging](#debugging)
       - [Using UI](#using-ui)
       - [VSCode](#vscode)
+      - [Log All Request](#log-all-request)
     - [Page](#page)
       - [Go Back](#go-back)
       - [Go Forward](#go-forward)
@@ -43,6 +44,9 @@
       - [Make API Call](#make-api-call)
       - [Running JavaScript Code](#running-javascript-code)
       - [Storage State](#storage-state)
+      - [Intercept Response (fulfill)](#intercept-response-fulfill)
+      - [Intercept Request (continue)](#intercept-request-continue)
+      - [Intercept Abort (abort)](#intercept-abort-abort)
     - [Child Window/Tab](#child-windowtab)
     - [Codegen](#codegen)
     - [Traces](#traces)
@@ -54,6 +58,7 @@
 ## Links
 
 - [Playwright Docs](https://playwright.dev/docs/intro)
+- [Playwright Traces Preview](https://trace.playwright.dev/)
 
 ## Init Playwright
 
@@ -84,7 +89,7 @@ test('Custom Playwright context', async ({ browser }) => {
     const page = await context.newPage();
     // Go to page
     await page.goto('https://rogertakeshita.com');
-    await context.close();
+    await page.close();
 });
 
 test('Default context', async ({ page }) => {
@@ -192,6 +197,41 @@ Create/Add two new config to your `launch.json` debugger file
         }
     ]
 }
+```
+
+#### Log All Request
+
+- [Playwright Service Workers:Network Events and Routing](https://playwright.dev/docs/service-workers-experimental#network-events-and-routing)
+
+Add an event listener to all network `request`.
+
+```JavaScript
+page.on('request', (req) => {
+    const currenturl = req.url();
+
+    if (currenturl === reqresurl && !requestflag) {
+        console.log({
+            type: 'Request',
+            url: currentURL,
+        });
+        requestFlag = true;
+    }
+});
+```
+
+```JavaScript
+page.on('response', (res) => {
+    const currentURL = res.url();
+
+    if (currentURL === reqResURL && !responseFlag) {
+        console.log({
+            type: 'Response',
+            url: currentURL,
+            status: res.status(),
+        });
+        responseFlag = true;
+    }
+});
 ```
 
 ---
@@ -765,6 +805,104 @@ await page.addInitScript((value) => {
 
 - [Playwright Browser:Storage State](https://playwright.dev/docs/api/class-browsercontext#browser-context-storage-state)
 
+```JavaScript
+const { test, expect } = require('@playwright/test');
+const { newPageFromBrowser } = require('./_helpers');
+
+const email = 'anshika@gmail.com';
+const password = 'Iamking@000';
+let customContext;
+
+test.beforeAll(async ({ browser }) => {
+    const filename = 'storageState.json';
+    const { page, context } = await newPageFromBrowser(browser);
+    await page.goto('https://rahulshettyacademy.com/client');
+
+    await page.locator('#userEmail').fill(email);
+    await page.locator('#userPassword').fill(password);
+    await page.locator('[value="Login"]').click();
+    await page.waitForLoadState('networkidle');
+    // Create a shareable file with all tokens / localStorage
+    await context.storageState({ path: filename });
+    // Create a new context using storageState
+    customContext = await browser.newContext({ storageState: filename });
+    await page.close();
+});
+
+test('API - Add Token To Storage State', async () => {
+    // Create a new page using customContext
+    const page = await customContext.newPage();
+    ...
+    await page.close();
+});
+```
+
+#### Intercept Response (fulfill)
+
+- [Playwright Route:fulfill](https://playwright.dev/docs/api/class-route#route-fulfill)
+
+```JavaScript
+await page.route(url, async (route) => {
+    // Change our page into api request mode
+    const response = await page.request.fetch(route.request());
+    // Fufill promise
+    const fakeData = {
+        data: [],
+        count: 0,
+        message: 'No Orders',
+    };
+    route.fulfill({ response, body: JSON.stringify(fakeData) });
+});
+
+// Products page
+//    Brower makes the api call
+await page.goto('https://rahulshettyacademy.com/client');
+await page.locator('button[routerlink="/dashboard/myorders"]').click();
+```
+
+#### Intercept Request (continue)
+
+- [Playwright Route:continue](https://playwright.dev/docs/api/class-route#route-continue)
+
+```JavaScript
+const orderId = await page.locator('tr.ng-star-inserted').first().locator('th').textContent();
+
+// Mock request
+const url = `https://rahulshettyacademy.com/api/ecom/order/get-orders-details?id=${orderId}`;
+const mokedUrl = 'https://rahulshettyacademy.com/api/ecom/order/get-orders-details?id=63c05b26568c3e9fb1f64469';
+
+
+// We are overwriting the initial request url with mockedUrl
+await page.route(url, (route) => {
+    route.continue({ url: mokedUrl });
+});
+
+await page.locator('tr.ng-star-inserted').first().locator('button').first().click();
+const text = await page.locator('.blink_me').textContent();
+expect(text).toBe('You are not authorize to view this order');
+```
+
+#### Intercept Abort (abort)
+
+- [Playwright Route:abort](https://playwright.dev/docs/api/class-route#route-abort)
+
+We can also abort an API call. eg:
+
+- Prevent the browser from downloading `CSS`
+- Prevent the browser from downloading images
+
+```JavaScript
+await page.route('**/*.css', (route) => {
+    route.abort();
+});
+```
+
+```JavaScript
+await page.route('**/*.{jpg,png,jpeg}', (route) => {
+    ait route.abort();
+});
+```
+
 ---
 
 ### Child Window/Tab
@@ -780,7 +918,7 @@ test('UI Controls - Child Window/Tab - Should Pass', async ({ browser }) => {
     const [_, newPage] = await Promise.all([blinkingEl.click(), context.waitForEvent('page')]);
     const text = await newPage.locator('.red').textContent();
     log(text);
-    await context.close();
+    await page.close();
 });
 ```
 
@@ -814,7 +952,7 @@ test('test', async ({ page }) => {
     await page.getByPlaceholder('Your Message...').click();
     await page.getByPlaceholder('Your Message...').fill('Testing from codegen');
     await page.getByRole('button', { name: 'Send' }).click();
-    await context.close();
+    await page.close();
 });
 ```
 

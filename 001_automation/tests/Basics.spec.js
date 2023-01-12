@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test');
-const { delay, log } = require('./_helpers');
+const { log } = require('./_helpers');
 
 test('Browser Context-Validating - Should Login', async ({ browser }) => {
     const context = await browser.newContext();
@@ -144,7 +144,7 @@ test('UI Controls - Checkbox - Should Pass', async ({ browser }) => {
     await termsBox.uncheck();
     await expect(termsBox).not.toBeChecked();
     const isChecked = await termsBox.isChecked();
-    await expect(isChecked).toBeFalsy();
+    expect(isChecked).toBeFalsy();
     await page.close();
 });
 

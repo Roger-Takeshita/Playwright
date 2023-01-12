@@ -1,23 +1,17 @@
 const { test, expect, request } = require('@playwright/test');
-const { delay, log, newPageFromBrowser, getData, postData, ApiUtils } = require('./_helpers');
+const { newPageFromBrowser, postData, Request } = require('./_helpers');
 
 const email = 'anshika@gmail.com';
-const password = 'Iamking@000';
-const url = 'https://rahulshettyacademy.com/api/ecom/auth/login';
-const data = {
-    userEmail: email,
-    userPassword: password,
-};
 let token;
 
 test.beforeAll(async () => {
     const apiContext = await request.newContext();
-    const api = new ApiUtils(apiContext);
+    const api = new Request(apiContext);
     token = await api.login();
 });
 
 test('API - Authenticate', async ({ browser }) => {
-    const { page, context } = await newPageFromBrowser(browser, token);
+    const { page } = await newPageFromBrowser(browser, token);
 
     // Products Page
     const product1 = 'adidas original';
@@ -29,7 +23,7 @@ test('API - Authenticate', async ({ browser }) => {
     await page.locator('[routerlink="/dashboard/cart"]').click();
     await page.locator('.cart li').last().waitFor();
     const exists = await page.locator(`h3:has-text('${product1}')`).isVisible();
-    await expect(exists).toBeTruthy();
+    expect(exists).toBeTruthy();
     await page.locator('button[type="button"]').nth(1).locator('text=Checkout').click();
     // Checkout Page
     await page.locator('.row input').nth(0).fill('4242424242424242');
@@ -69,7 +63,7 @@ test('API - Authenticate', async ({ browser }) => {
 });
 
 test('API - Verify Order', async ({ browser }) => {
-    const { page, context } = await newPageFromBrowser(browser, token);
+    const { page } = await newPageFromBrowser(browser, token);
 
     const orderUrl = 'https://rahulshettyacademy.com/api/ecom/order/create-order';
     const orderData = {
@@ -105,8 +99,8 @@ test('API - Verify Order', async ({ browser }) => {
 });
 
 test('API - Verify Order2', async ({ browser }) => {
-    const api = new ApiUtils();
-    const { page, context } = await newPageFromBrowser(browser, api.token);
+    const api = new Request();
+    const { page } = await newPageFromBrowser(browser, api.token);
 
     const url = 'https://rahulshettyacademy.com/api/ecom/order/create-order';
     const data = {
