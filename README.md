@@ -14,6 +14,7 @@
     - [Page](#page)
       - [Go Back](#go-back)
       - [Go Forward](#go-forward)
+      - [Screenshot](#screenshot)
     - [Auto-waiting](#auto-waiting)
     - [Locators](#locators)
       - [Chaining](#chaining)
@@ -254,6 +255,56 @@ await page.goBack();
 
 ```JavaScript
 await page.goForward();
+```
+
+#### Screenshot
+
+- [Playwright Screenshots](https://playwright.dev/docs/screenshots)
+
+Take a screenshot from entire page
+
+```JavaScript
+await page.screenshot({ path: 'downloads/screenshot.png' });
+```
+
+Take a screenshot from a specific element only
+
+```JavaScript
+await page.locator('#displayed-text').screenshot({ path: 'downloads/screenshot_element.png' });
+```
+
+```JavaScript
+const fieldTotal = await page.locator('fieldset').count();
+
+for (let i = 0; i < fieldTotal; i++) {
+    const currentText = await page.locator('fieldset').nth(i).locator('legend').textContent();
+    if (currentText === 'Element Displayed Example') {
+        idx = i;
+        await page.locator('fieldset').nth(i).screenshot({ path: 'downloads/screenshot_visible.png' });
+        break;
+    }
+}
+```
+
+#### Screenshot Snapshot
+
+```JavaScript
+await waitForAnimationEnd(page, '.heading-primary__text-title-1');
+const currentScreenshot = await page.screenshot();
+expect(currentScreenshot).toMatchSnapshot('original_rogertakeshita.png');
+```
+
+`waitForAnimationEnd` is a helper function to wait for the CSS animation to end
+
+```JavaScript
+const waitForAnimationEnd = async (page, selector, ms = 500) => {
+    const result = await page
+        .locator(selector)
+        .evaluate((element) => Promise.all(element.getAnimations().map((animation) => animation.finished)));
+    await delay(ms);
+
+    return result;
+};
 ```
 
 ---

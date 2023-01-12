@@ -1,8 +1,8 @@
 const { expect, request } = require('@playwright/test');
 
-const delay = (seconds) => {
+const delay = (ms) => {
     return new Promise((resolve) => {
-        setTimeout(resolve, seconds * 1000);
+        setTimeout(resolve, ms);
     });
 };
 
@@ -132,13 +132,23 @@ class Request {
     }
 }
 
+const waitForAnimationEnd = async (page, selector, ms = 500) => {
+    const result = await page
+        .locator(selector)
+        .evaluate((element) => Promise.all(element.getAnimations().map((animation) => animation.finished)));
+    await delay(ms);
+
+    return result;
+};
+
 module.exports = {
+    Request,
     delay,
+    getData,
     log,
-    toTitleCase,
     newPageFromBrowser,
     newPageFromContext,
-    getData,
     postData,
-    Request,
+    toTitleCase,
+    waitForAnimationEnd,
 };
