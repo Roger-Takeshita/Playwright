@@ -1,3 +1,5 @@
+const { expect, request } = require('@playwright/test');
+
 const delay = (seconds) => {
     return new Promise((resolve) => {
         setTimeout(resolve, seconds * 1000);
@@ -25,9 +27,15 @@ const toTitleCase = (str = '') => {
         .trim();
 };
 
-const newPageFromBrowser = async (browser) => {
+const newPageFromBrowser = async (browser, token) => {
     const context = await browser.newContext();
     const page = await context.newPage();
+
+    if (token) {
+        await page.addInitScript((value) => {
+            window.localStorage.setItem('token', value);
+        }, token);
+    }
 
     return { page, context };
 };
@@ -37,10 +45,96 @@ const newPageFromContext = async (context) => {
     return page;
 };
 
+const getData = async (url, token) => {
+    const options = {};
+    const headers = {
+        Authorization: token,
+        'Application-Content': 'application/json',
+    };
+
+    if (token) options.headers = headers;
+
+    const apiContext = await request.newContext();
+    const response = await apiContext.get(url, options);
+    if (!response.ok()) console.error({ response });
+    await expect(response.ok()).toBeTruthy();
+
+    return response.json();
+};
+
+const postData = async (url, token, data) => {
+    const options = {};
+    const headers = {
+        Authorization: token,
+        'Application-Content': 'application/json',
+    };
+
+    if (token) options.headers = headers;
+    if (data) options.data = data;
+
+    const apiContext = await request.newContext();
+    const response = await apiContext.post(url, options);
+    if (!response.ok()) console.error({ response });
+    await expect(response.ok()).toBeTruthy();
+
+    return response.json();
+};
+
+class ApiUtils {
+    constructor(apiContext) {
+        if (ApiUtils._instance) return ApiUtils._instance;
+        ApiUtils._instance = this;
+
+        this.apiContext = apiContext;
+        this.token;
+        this.options;
+    }
+
+    async login() {
+        const email = 'anshika@gmail.com';
+        const password = 'Iamking@000';
+        const url = 'https://rahulshettyacademy.com/api/ecom/auth/login';
+        const data = {
+            userEmail: email,
+            userPassword: password,
+        };
+
+        const loginResponse = await this.apiContext.post(url, { data });
+        const { token } = await loginResponse.json();
+
+        this.token = token;
+        this.options = {
+            headers: {
+                Authorization: token,
+                'Application-Content': 'application/json',
+            },
+        };
+
+        log(token, 'login token');
+
+        return token;
+    }
+
+    async postData(url, data) {
+        if (data) this.options.data = data;
+
+        const response = await this.apiContext.post(url, this.options);
+        return response.json();
+    }
+
+    async getData(url) {
+        const response = await this.apiContext.get(url, this.options);
+        return response.json();
+    }
+}
+
 module.exports = {
     delay,
     log,
     toTitleCase,
     newPageFromBrowser,
     newPageFromContext,
+    getData,
+    postData,
+    ApiUtils,
 };

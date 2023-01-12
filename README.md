@@ -36,6 +36,9 @@
       - [Custom Expect Message](#custom-expect-message)
       - [Polling](#polling)
       - [Retrying](#retrying)
+    - [API](#api)
+      - [Make API Call](#make-api-call)
+      - [Running JavaScript Code](#running-javascript-code)
     - [Child Window/Tab](#child-windowtab)
     - [Codegen](#codegen)
     - [Traces](#traces)
@@ -631,6 +634,46 @@ await expect(async () => {
 });
 ```
 
+---
+
+### API
+
+#### Make API Call
+
+Skip login, using API call
+
+```JavaScript
+const email = 'anshika@gmail.com';
+const password = 'Iamking@000';
+const url = 'https://rahulshettyacademy.com/api/ecom/auth/login';
+const data = {
+    userEmail: email,
+    userPassword: password,
+};
+let token;
+
+test.beforeAll(async () => {
+    const apiContext = await request.newContext();
+    const loginResponse = await apiContext.post(url, { data });
+    await expect(loginResponse.ok()).toBeTruthy();
+    const { token: jwt } = await loginResponse.json();
+    log(jwt);
+    token = jwt;
+});
+```
+
+#### Running JavaScript Code
+
+To run a JS code, we need o use `addInitScript()`
+
+```JavaScript
+await page.addInitScript((value) => {
+    window.localStorage.setItem('token', value);
+}, token);
+```
+
+---
+
 ### Child Window/Tab
 
 ```JavaScript
@@ -647,6 +690,8 @@ test('UI Controls - Child Window/Tab - Should Pass', async ({ browser }) => {
     await context.close();
 });
 ```
+
+---
 
 ### Codegen
 
