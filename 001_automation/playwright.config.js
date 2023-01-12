@@ -12,7 +12,7 @@ const config = {
         browserName: 'chromium',
         // browserName: 'firefox',
         // browserName: 'webkit', // Safari
-        headless: false,
+        headless: true,
         screenshot: 'on',
         trace: 'retain-on-failure',
     },

@@ -16,7 +16,7 @@ test('Browser Context-Validating - Should Return Array of Products, Wait For API
     await page.waitForLoadState('networkidle');
     const titles = await page.locator('.card-body b').allTextContents();
     log(titles);
-    await context.close();
+    await page.close();
 });
 
 test('E2E - Test 1', async ({ browser }) => {
@@ -39,7 +39,7 @@ test('E2E - Test 1', async ({ browser }) => {
     await page.locator('.cart li').last().waitFor();
     const exists = await page.locator(`h3:has-text('${product1}')`).isVisible();
     await expect(exists).toBeTruthy();
-    await context.close();
+    await page.close();
 });
 
 test('E2E - Test 2', async ({ browser }) => {
@@ -95,5 +95,5 @@ test('E2E - Test 2', async ({ browser }) => {
         }
     }
 
-    await context.close();
+    await page.close();
 });

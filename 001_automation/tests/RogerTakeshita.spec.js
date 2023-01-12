@@ -9,14 +9,14 @@ test('Custom Playwright context', async ({ browser }) => {
     const page = await context.newPage();
     // Go to page
     await page.goto('https://rogertakeshita.com');
-    await context.close();
+    await page.close();
 });
 
 test('Default context', async ({ browser }) => {
     const context = await browser.newContext();
     const page = await context.newPage();
     await page.goto('https://rogertakeshita.com');
-    await context.close();
+    await page.close();
 });
 
 test('Default context - expect page title to be "Roger Takeshita"', async ({ browser }) => {
@@ -26,7 +26,7 @@ test('Default context - expect page title to be "Roger Takeshita"', async ({ bro
     const pagetitle = await page.title();
     console.log(`page title = ${pagetitle}`);
     await expect(page).toHaveTitle('Roger Takeshita');
-    await context.close();
+    await page.close();
 });
 
 test('Default context - submit contact form', async ({ browser }) => {
@@ -45,7 +45,7 @@ test('Default context - submit contact form', async ({ browser }) => {
     //     `Thank you ${name} for you message, chat with you soon.`
     // );
     // await page.locator('.modal-msg__close').click();
-    await context.close();
+    await page.close();
 });
 
 test('Gencode', async ({ browser }) => {
@@ -69,5 +69,5 @@ test('Gencode', async ({ browser }) => {
     await page.getByPlaceholder('Your Message...').click();
     await page.getByPlaceholder('Your Message...').fill('Testing from codegen');
     await page.getByRole('button', { name: 'Send' }).click();
-    await context.close();
+    await page.close();
 });

@@ -7,13 +7,17 @@
   - [Base Config](#base-config)
   - [Run tests](#run-tests)
   - [Docs](#docs)
-    - [Inspector / Pause](#inspector--pause)
+    - [Debugging](#debugging)
+      - [Using UI](#using-ui)
+      - [VSCode](#vscode)
     - [Page](#page)
       - [Go Back](#go-back)
       - [Go Forward](#go-forward)
     - [Auto-waiting](#auto-waiting)
     - [Locators](#locators)
       - [Chaining](#chaining)
+      - [CSS Locators](#css-locators)
+      - [Tag Name (`has-text`)](#tag-name-has-text)
     - [Selectors](#selectors)
       - [CSS Selectors](#css-selectors)
       - [Dropdown](#dropdown)
@@ -21,7 +25,6 @@
       - [Checkbox](#checkbox)
       - [Check If an Element Has an Attribute](#check-if-an-element-has-an-attribute)
       - [Text](#text)
-      - [Tag Name (`has-text`)](#tag-name-has-text)
       - [Popup / Dialog](#popup--dialog)
       - [Hover](#hover)
       - [iFrame](#iframe)
@@ -39,6 +42,7 @@
     - [API](#api)
       - [Make API Call](#make-api-call)
       - [Running JavaScript Code](#running-javascript-code)
+      - [Storage State](#storage-state)
     - [Child Window/Tab](#child-windowtab)
     - [Codegen](#codegen)
     - [Traces](#traces)
@@ -49,10 +53,7 @@
 
 ## Links
 
-- [Docs](https://playwright.dev/docs/intro)
-- [Api Testing](https://playwright.dev/docs/test-api-testing)
-- [Assertions](https://playwright.dev/docs/test-assertions)
-- [Auto-waiting](https://playwright.dev/docs/actionability)
+- [Playwright Docs](https://playwright.dev/docs/intro)
 
 ## Init Playwright
 
@@ -63,6 +64,9 @@ npm init playwright
 ```
 
 ## Globally Available
+
+- [Playwright Browser](https://playwright.dev/docs/api/class-browser)
+- [Playwright Page](https://playwright.dev/docs/api/class-page)
 
 In `Playwright` we have some globally available fixtures, like:
 
@@ -90,6 +94,9 @@ test('Default context', async ({ page }) => {
 
 ## Base Config
 
+- [Playwright Config](https://playwright.dev/docs/test-configuration)
+- [Playwright Advanced Config](https://playwright.dev/docs/test-advanced)
+
 In `001_automation/playwright.config.js`
 
 ```JavaScript
@@ -107,7 +114,7 @@ const config = {
         browserName: 'chromium',
         // browserName: 'firefox',
         // browserName: 'webkit', // Safari
-        headless: false,
+        headless: true,
         screenshot: 'on',
         trace: 'retain-on-failure',
     },
@@ -117,6 +124,8 @@ module.exports = config;
 ```
 
 ## Run tests
+
+- [Playwright Command Line](https://playwright.dev/docs/test-cli)
 
 ```Bash
 npx playwright test
@@ -130,7 +139,11 @@ npx playwright test --headed --debug
 
 ---
 
-### Inspector / Pause
+### Debugging
+
+- [Playwright Debugging Tests](https://playwright.dev/docs/debug)
+
+#### Using UI
 
 ```JavaScript
 await page.pause();
@@ -138,11 +151,58 @@ await page.pause();
 
 This command will pause the `Playwright` execution. Like a debugger breakpoint
 
+#### VSCode
+
+Using VSCode we need to update the `package.json` to include a generic test script
+
+```JSON
+"scripts": {
+    "test": "npx playwright test"
+},
+```
+
+Create/Add two new config to your `launch.json` debugger file
+
+- Headed mode
+- Headless mode
+
+```JSON
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Playwright Headed",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}/tests/Api2.spec.js",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run-script", "test"],
+            "args": ["--headed"]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Playwright Headless",
+            "skipFiles": ["<node_internals>/**"],
+            "program": "${workspaceFolder}/tests/Api2.spec.js",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run-script", "test"],
+            "args": []
+        }
+    ]
+}
+```
+
 ---
 
 ### Page
 
+- [Playwright Page](https://playwright.dev/docs/api/class-page)
+
 #### Go Back
+
+- [Playwright Page:goBack](https://playwright.dev/docs/api/class-page#page-go-back)
 
 ```JavaScript
 await page.goBack();
@@ -150,15 +210,17 @@ await page.goBack();
 
 #### Go Forward
 
+- [Playwright Page:goForward](https://playwright.dev/docs/api/class-page#page-go-forward)
+
 ```JavaScript
-await page.gotForward();
+await page.goForward();
 ```
 
 ---
 
 ### Auto-waiting
 
-- [Auto-waiting](https://playwright.dev/docs/actionability)
+- [Playwright Auto-waiting](https://playwright.dev/docs/actionability)
 
 | Action                 | Attached | Visible | Stable | Receives Events | Enabled | Editable |
 | ---------------------- | -------- | ------- | ------ | --------------- | ------- | -------- |
@@ -273,7 +335,11 @@ test('default context - expect page title to be Roger Takeshita', async ({ page 
 
 ### Locators
 
+- [Playwright Locators](https://playwright.dev/docs/locators)
+
 #### Chaining
+
+- [Playwright Locators:Chaining Locators](https://playwright.dev/docs/locators#chaining-locators)
 
 ```JavaScript
 await page.locator('button[type="button"]').nth(1).locator('text=Checkout').click();
@@ -284,7 +350,23 @@ await page.locator('button[type="button"]').nth(1).locator('text=Checkout').clic
 //                             └── Return an array of buttons
 ```
 
+#### CSS Locators
+
+- [Playwright Locators:CSS Locators](https://playwright.dev/docs/other-locators#css-locator)
+
+#### Tag Name (`has-text`)
+
+```JavaScript
+await page.locator('.cart li').last().waitFor();
+const exists = await page.locator(`h3:has-text('${product1}')`).isVisible();
+await expect(exists).toBeTruthy();
+```
+
+---
+
 ### Selectors
+
+- [Playwright Selectors](https://playwright.dev/docs/api/class-selectors)
 
 ```JavaScript
 await page.locator('#name');
@@ -381,14 +463,6 @@ const successMsg = await page.locator('.hero-primary');
 await expect(successMsg).toHaveText('Thankyou for the order.');
 ```
 
-#### Tag Name (`has-text`)
-
-```JavaScript
-await page.locator('.cart li').last().waitFor();
-const exists = await page.locator(`h3:has-text('${product1}')`).isVisible();
-await expect(exists).toBeTruthy();
-```
-
 #### Popup / Dialog
 
 There is the `on` method, that will listen for events
@@ -443,12 +517,16 @@ expect(subscriberNumber).toBe('13522');
 
 #### Wait For API To Idle
 
+- [Playwright Frame:waitForLoadState](https://playwright.dev/docs/api/class-frame#frame-wait-for-load-state)
+
 ```JavaScript
 await page.waitForLoadState('networkidle');
 const titles = await page.locator('.card-body b').allTextContents();
 ```
 
 #### Wait For HTML To Load
+
+- [Playwright Frame:waitForNavigation](https://playwright.dev/docs/api/class-frame#frame-wait-for-navigation)
 
 ```JavaScript
 // Wait until page change
@@ -457,6 +535,8 @@ const titles = await page.locator('.card-body a').allTextContents();
 ```
 
 #### Wait For Element To Load
+
+- [Playwright Locators:waitFor](https://playwright.dev/docs/api/class-locator#locator-wait-for)
 
 ```JavaScript
 await page.locator('.cart li').last().waitFor();
@@ -467,6 +547,8 @@ await expect(exists).toBeTruthy();
 ---
 
 ### Assertions
+
+- [Playwright Assertions](https://playwright.dev/docs/test-assertions)
 
 `Playwright` Test uses [expect](https://jestjs.io/docs/expect) library for test assertions. This library provides a lot of matchers like `toEqual`, `toContain`, `toMatch`, `toMatchSnapshot` and many more:
 
@@ -638,7 +720,12 @@ await expect(async () => {
 
 ### API
 
+- [Playwright API Testing](https://playwright.dev/docs/test-api-testing)
+
 #### Make API Call
+
+- [Playwright API Request](https://playwright.dev/docs/api/class-apirequest)
+- [Playwright API Response](https://playwright.dev/docs/api/class-apiresponse)
 
 Skip login, using API call
 
@@ -664,6 +751,8 @@ test.beforeAll(async () => {
 
 #### Running JavaScript Code
 
+- [Playwright Page:addInitScript](https://playwright.dev/docs/api/class-page#page-add-init-script)
+
 To run a JS code, we need o use `addInitScript()`
 
 ```JavaScript
@@ -671,6 +760,10 @@ await page.addInitScript((value) => {
     window.localStorage.setItem('token', value);
 }, token);
 ```
+
+#### Storage State
+
+- [Playwright Browser:Storage State](https://playwright.dev/docs/api/class-browsercontext#browser-context-storage-state)
 
 ---
 
@@ -694,6 +787,8 @@ test('UI Controls - Child Window/Tab - Should Pass', async ({ browser }) => {
 ---
 
 ### Codegen
+
+- [Playwright Codegen](https://playwright.dev/docs/codegen-intro#running-codegen)
 
 ```Bash
 npx playwright codegen https://rogertakeshita.com
@@ -725,31 +820,7 @@ test('test', async ({ page }) => {
 
 ### Traces
 
-We can enable traces and screenshots in the `playwright.config.js`
-
-```JavaScript
-// @ts-check
-const { devices } = require('@playwright/test');
-
-const config = {
-    testDir: './tests',
-    timeout: 30 * 1000,
-    expect: {
-        timeout: 5000,
-    },
-    reporter: 'html',
-    use: {
-        browserName: 'chromium',
-        // browserName: 'firefox',
-        // browserName: 'webkit', // Safari
-        headless: false,
-        screenshot: 'on',
-        trace: 'retain-on-failure',
-    },
-};
-
-module.exports = config;
-```
+- [Playwright Traces](https://playwright.dev/docs/trace-viewer-intro)
 
 To preview and inspect a trace.
 

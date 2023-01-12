@@ -14,8 +14,7 @@ test('Validations Test 1 - Dialog/Popup', async ({ browser }) => {
     page.on('dialog', (dialog) => dialog.accept());
     await page.locator('#confirmbtn').click();
 
-    await page.pause();
-    await context.close();
+    await page.close();
 });
 
 test('Validations Test 2 - Hover', async ({ browser }) => {
@@ -25,8 +24,7 @@ test('Validations Test 2 - Hover', async ({ browser }) => {
     await page.locator('#mousehover').hover();
     await page.locator('[href="#top"]').click();
 
-    await page.pause();
-    await context.close();
+    await page.close();
 });
 
 test('Validations Test 3 - iFrame', async ({ browser }) => {
@@ -40,5 +38,5 @@ test('Validations Test 3 - iFrame', async ({ browser }) => {
     const subscriberNumber = text.split(' ')[1].replace(',', '');
     expect(subscriberNumber).toBe('13522');
 
-    await context.close();
+    await page.close();
 });

@@ -10,7 +10,7 @@ test('Browser Context-Validating - Should Login', async ({ browser }) => {
     await page.locator('#username').fill('rahulshettyacademy');
     await page.locator("[type='password']").type('learning');
     await page.locator('#signInBtn').click();
-    await context.close();
+    await page.close();
 });
 
 test('Browser Context-Validating - Should Not Login', async ({ browser }) => {
@@ -23,7 +23,7 @@ test('Browser Context-Validating - Should Not Login', async ({ browser }) => {
     await page.locator("[type='password']").type('learning');
     await page.locator('#signInBtn').click();
     await expect(page.locator("[style*='block']")).toContainText('Incorrect');
-    await context.close();
+    await page.close();
 });
 
 test('Browser Context-Validating - Should Login After Fixing Form', async ({ browser }) => {
@@ -42,7 +42,7 @@ test('Browser Context-Validating - Should Login After Fixing Form', async ({ bro
     await expect(page.locator("[style*='block']")).toContainText('Incorrect');
     await usernameInput.fill('rahulshettyacademy');
     await signinBtn.click();
-    await context.close();
+    await page.close();
 });
 
 test('Browser Context-Validating - Should Return First Product', async ({ browser }) => {
@@ -66,7 +66,7 @@ test('Browser Context-Validating - Should Return First Product', async ({ browse
     log(await cards.nth(0).textContent());
     log(await cards.nth(1).textContent());
     log(await cards.nth(2).textContent());
-    await context.close();
+    await page.close();
 });
 
 test('Browser Context-Validating - Should Return Array of Products, Wait HTML To Load', async ({ browser }) => {
@@ -82,7 +82,7 @@ test('Browser Context-Validating - Should Return Array of Products, Wait HTML To
     await Promise.all([page.locator('#signInBtn').click(), page.waitForNavigation()]);
     const titles = await page.locator('.card-body a').allTextContents();
     log(titles);
-    await context.close();
+    await page.close();
 });
 
 test('UI Controls - Dropdown', async ({ browser }) => {
@@ -92,7 +92,7 @@ test('UI Controls - Dropdown', async ({ browser }) => {
     await page.goto('https://rahulshettyacademy.com/loginpagePractise');
 
     await page.locator('select.form-control').selectOption('consult');
-    await context.close();
+    await page.close();
 });
 
 test('UI Controls - Radio Button - Should Pass', async ({ browser }) => {
@@ -109,7 +109,7 @@ test('UI Controls - Radio Button - Should Pass', async ({ browser }) => {
     await expect(userRadio).toBeChecked();
     const isChecked = await userRadio.isChecked();
     log(isChecked ? 'User Radio Is Checked' : 'User Radio Is NOT Checked');
-    await context.close();
+    await page.close();
 });
 
 test('UI Controls - Radio Button - Should Fail', async ({ browser }) => {
@@ -123,7 +123,7 @@ test('UI Controls - Radio Button - Should Fail', async ({ browser }) => {
     await expect(userRadio).not.toBeChecked();
     const isChecked = await userRadio.isChecked();
     log(isChecked ? 'User Radio Is Checked' : 'User Radio Is NOT Checked');
-    await context.close();
+    await page.close();
 });
 
 test('UI Controls - Checkbox - Should Pass', async ({ browser }) => {
@@ -145,7 +145,7 @@ test('UI Controls - Checkbox - Should Pass', async ({ browser }) => {
     await expect(termsBox).not.toBeChecked();
     const isChecked = await termsBox.isChecked();
     await expect(isChecked).toBeFalsy();
-    await context.close();
+    await page.close();
 });
 
 test('UI Controls - Check Attribute Value - Should Pass', async ({ browser }) => {
@@ -156,7 +156,7 @@ test('UI Controls - Check Attribute Value - Should Pass', async ({ browser }) =>
 
     const blinkingEl = page.locator('[href*="documents-request"]');
     await expect(blinkingEl).toHaveAttribute('class', 'blinkingText');
-    await context.close();
+    await page.close();
 });
 
 test('UI Controls - Child Window/Tab - Should Pass', async ({ browser }) => {
@@ -170,5 +170,5 @@ test('UI Controls - Child Window/Tab - Should Pass', async ({ browser }) => {
     const text = await newPage.locator('.red').textContent();
     const domain = text.split('@')[1].split(' ')[0];
     await page.locator('#username').fill(domain);
-    await context.close();
+    await page.close();
 });

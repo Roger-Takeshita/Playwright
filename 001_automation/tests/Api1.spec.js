@@ -65,7 +65,7 @@ test('API - Authenticate', async ({ browser }) => {
         }
     }
 
-    await context.close();
+    await page.close();
 });
 
 test('API - Verify Order', async ({ browser }) => {
@@ -101,10 +101,10 @@ test('API - Verify Order', async ({ browser }) => {
         }
     }
 
-    await context.close();
+    await page.close();
 });
 
-test.only('API - Verify Order2', async ({ browser }) => {
+test('API - Verify Order2', async ({ browser }) => {
     const api = new ApiUtils();
     const { page, context } = await newPageFromBrowser(browser, api.token);
 
@@ -139,5 +139,5 @@ test.only('API - Verify Order2', async ({ browser }) => {
         }
     }
 
-    await context.close();
+    await page.close();
 });
