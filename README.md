@@ -4,7 +4,9 @@
   - [Links](#links)
   - [Init Playwright](#init-playwright)
   - [Globally Available](#globally-available)
-  - [Base Config](#base-config)
+  - [Config](#config)
+    - [Multiple Config Files](#multiple-config-files)
+    - [Multiple Projects](#multiple-projects)
   - [Run tests](#run-tests)
   - [Docs](#docs)
     - [Debugging](#debugging)
@@ -101,10 +103,16 @@ test('Default context', async ({ page }) => {
 });
 ```
 
-## Base Config
+## Config
 
 - [Playwright Config](https://playwright.dev/docs/test-configuration)
+- [Playwright Config:screenshot](https://playwright.dev/docs/test-configuration#automatic-screenshots)
+- [Playwright Config:video](https://playwright.dev/docs/test-configuration#record-video)
 - [Playwright Advanced Config](https://playwright.dev/docs/test-advanced)
+- [Playwright Emulation:viewport](https://playwright.dev/docs/emulation#viewport)
+- [Playwright Emulation:devices](https://playwright.dev/docs/emulation#devices)
+- [Playwright Emulation:permissions](https://playwright.dev/docs/emulation#permissions)
+- [Playwright Ignore HTTPS Errors](https://playwright.dev/docs/api/class-testoptions#test-options-ignore-https-errors)
 
 In `001_automation/playwright.config.js`
 
@@ -125,12 +133,134 @@ const config = {
         // browserName: 'webkit', // Safari
         headless: true,
         screenshot: 'on',
+        video: 'retain-on-failure',
         trace: 'retain-on-failure',
     },
 };
 
 module.exports = config;
 ```
+
+### Multiple Config Files
+
+Create a new file `playwright.config.safari.js`
+
+```JavaScript
+// @ts-check
+const { devices } = require('@playwright/test');
+
+const config = {
+    testDir: './tests',
+    timeout: 30 * 1000,
+    expect: {
+        timeout: 5000,
+    },
+    reporter: 'html',
+    use: {
+        browserName: 'webkit',
+        headless: false,
+        screenshot: 'on',
+        video: 'retain-on-failure',
+        trace: 'retain-on-failure',
+    },
+};
+
+module.exports = config;
+```
+
+```Bash
+npx playwright test Fixture.spec.js --config playwright.config.safari.js
+```
+
+### Multiple Projects
+
+```JavaScript
+// @ts-check
+const { devices } = require('@playwright/test');
+
+const config = {
+    testDir: './tests',
+    timeout: 30 * 1000,
+    expect: {
+        timeout: 5000,
+    },
+    reporter: 'html',
+    projects: [
+        {
+            name: 'Chrome',
+            use: {
+                browserName: 'chromium',
+                headless: true,
+                screenshot: 'on',
+                video: 'retain-on-failure',
+                trace: 'retain-on-failure',
+            },
+        },
+        {
+            name: 'Firefox',
+            use: {
+                browserName: 'firefox',
+                headless: false,
+                screenshot: 'off',
+                trace: 'off',
+                viewport: {
+                    width: 1920,
+                    height: 1080,
+                },
+            },
+        },
+        {
+            name: 'Safair',
+            use: {
+                browserName: 'webkit',
+                headless: false,
+                screenshot: 'on',
+                trace: 'retain-on-failure',
+            },
+        },
+        {
+            name: 'iPhone',
+            use: {
+                browserName: 'webkit',
+                headless: false,
+                screenshot: 'on',
+                trace: 'retain-on-failure',
+                ...devices['iPhone 11'],
+            },
+        },
+        {
+            name: 'ignoreHttpsErrors',
+            use: {
+                browserName: 'webkit',
+                headless: false,
+                screenshot: 'on',
+                trace: 'retain-on-failure',
+                ignoreHttpsErros: true,
+            },
+        },
+        {
+            name: 'differentPermission',
+            use: {
+                browserName: 'webkit',
+                headless: false,
+                screenshot: 'on',
+                trace: 'retain-on-failure',
+                permissions: ['geolocation', 'notifications'],
+            },
+        },
+    ],
+};
+
+module.exports = config;
+```
+
+To execute a project
+
+```Bash
+npx playwright test Fixture.spec.js --project Firefox
+```
+
+> By default if you have `projects` configured, but you don't provide a project, Playwright will run all the projects
 
 ## Run tests
 
