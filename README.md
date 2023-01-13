@@ -11,10 +11,13 @@
       - [Using UI](#using-ui)
       - [VSCode](#vscode)
       - [Log All Request](#log-all-request)
+    - [Import Parameters / Data](#import-parameters--data)
+    - [Fixtures](#fixtures)
     - [Page](#page)
       - [Go Back](#go-back)
       - [Go Forward](#go-forward)
       - [Screenshot](#screenshot)
+      - [Screenshot Snapshot](#screenshot-snapshot)
     - [Auto-waiting](#auto-waiting)
     - [Locators](#locators)
       - [Chaining](#chaining)
@@ -232,6 +235,51 @@ page.on('response', (res) => {
         });
         responseFlag = true;
     }
+});
+```
+
+---
+
+### Import Parameters / Data
+
+```JavaScript
+const usersData = require('../fixtures/placeholder.json');
+const { user2 } = JSON.parse(JSON.stringify(usersData));
+```
+
+---
+
+### Fixtures
+
+- [Playwright Fixtures](https://playwright.dev/docs/api/class-fixtures)
+
+```JavaScript
+const playwright = require('@playwright/test');
+
+exports.customTest = playwright.test.extend({
+    user: {
+        email: 'fakeaccount@getnada.com',
+        password: 'superfake1B',
+        productName: 'adidas original',
+    },
+});
+```
+
+```JavaScript
+const { expect, request } = require('@playwright/test');
+const { newPageFromBrowser, Request } = require('./_helpers');
+const { customTest } = require('./customTest');
+
+customTest('Fixture Custom Test', async ({ browser, user }) => {
+    const apiContext = await request.newContext();
+    const req = new Request(apiContext, user.email, user.password);
+    const token = await req.login();
+
+    const { page } = await newPageFromBrowser(browser, token);
+
+    ...
+
+    await page.close();
 });
 ```
 

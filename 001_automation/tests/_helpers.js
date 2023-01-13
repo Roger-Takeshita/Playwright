@@ -82,7 +82,12 @@ const postData = async (url, token, data) => {
 
 class Request {
     constructor(apiContext, email, password) {
-        if (Request._instance) return Request._instance;
+        if (Request._instance) {
+            if (email) Request._instance.email = email;
+            if (password) Request._instance.password = password;
+
+            return Request._instance;
+        }
         Request._instance = this;
 
         this.apiContext = apiContext;
@@ -114,7 +119,8 @@ class Request {
             },
         };
 
-        log(token, 'login token');
+        log(this.email, 'Email');
+        log(token, 'token');
 
         return token;
     }
