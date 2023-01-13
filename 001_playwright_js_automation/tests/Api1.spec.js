@@ -4,6 +4,8 @@ const { newPageFromBrowser, postData, Request } = require('./_helpers');
 const email = 'anshika@gmail.com';
 let token;
 
+test.describe.configure({ mode: 'parallel' });
+
 test.beforeAll(async () => {
     const apiContext = await request.newContext();
     const api = new Request(apiContext);

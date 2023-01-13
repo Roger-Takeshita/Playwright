@@ -42,7 +42,7 @@ test('Screenshot - Element Only', async ({ browser }) => {
     await page.close();
 });
 
-test.only('Screenshot - Compare Snapshot', async ({ browser }) => {
+test('Screenshot - Compare Snapshot', async ({ browser }) => {
     const { page } = await newPageFromBrowser(browser);
     await page.goto('https://rogertakeshita.com');
 

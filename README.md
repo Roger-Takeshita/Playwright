@@ -7,6 +7,12 @@
   - [Config](#config)
     - [Multiple Config Files](#multiple-config-files)
     - [Multiple Projects](#multiple-projects)
+    - [Parallel Mode](#parallel-mode)
+      - [Same Test Suite](#same-test-suite)
+    - [Tags](#tags)
+    - [Reports](#reports)
+      - [Allure Report Plugin](#allure-report-plugin)
+      - [Traces](#traces)
   - [Run tests](#run-tests)
   - [Docs](#docs)
     - [Debugging](#debugging)
@@ -55,7 +61,9 @@
       - [Intercept Abort (abort)](#intercept-abort-abort)
     - [Child Window/Tab](#child-windowtab)
     - [Codegen](#codegen)
-    - [Traces](#traces)
+  - [Jenkins](#jenkins)
+    - [New Local Project](#new-local-project)
+    - [Dynamically Run Script](#dynamically-run-script)
 
 ---
 
@@ -108,6 +116,7 @@ test('Default context', async ({ page }) => {
 - [Playwright Config](https://playwright.dev/docs/test-configuration)
 - [Playwright Config:screenshot](https://playwright.dev/docs/test-configuration#automatic-screenshots)
 - [Playwright Config:video](https://playwright.dev/docs/test-configuration#record-video)
+- [Playwright Retries](https://playwright.dev/docs/test-retries)
 - [Playwright Advanced Config](https://playwright.dev/docs/test-advanced)
 - [Playwright Emulation:viewport](https://playwright.dev/docs/emulation#viewport)
 - [Playwright Emulation:devices](https://playwright.dev/docs/emulation#devices)
@@ -126,6 +135,7 @@ const config = {
     expect: {
         timeout: 5000,
     },
+    retries: 3,
     reporter: 'html',
     use: {
         browserName: 'chromium',
@@ -141,6 +151,8 @@ const config = {
 module.exports = config;
 ```
 
+---
+
 ### Multiple Config Files
 
 Create a new file `playwright.config.safari.js`
@@ -155,6 +167,7 @@ const config = {
     expect: {
         timeout: 5000,
     },
+    retries: 3,
     reporter: 'html',
     use: {
         browserName: 'webkit',
@@ -172,6 +185,8 @@ module.exports = config;
 npx playwright test Fixture.spec.js --config playwright.config.safari.js
 ```
 
+---
+
 ### Multiple Projects
 
 ```JavaScript
@@ -184,6 +199,7 @@ const config = {
     expect: {
         timeout: 5000,
     },
+    retries: 3,
     reporter: 'html',
     projects: [
         {
@@ -261,6 +277,110 @@ npx playwright test Fixture.spec.js --project Firefox
 ```
 
 > By default if you have `projects` configured, but you don't provide a project, Playwright will run all the projects
+
+---
+
+### Parallel Mode
+
+- [Playwright Parallelism and Sharding](https://playwright.dev/docs/test-parallel)
+
+```JavaScript
+const config = {
+    testDir: './tests',
+    timeout: 30 * 1000,
+    expect: {
+        timeout: 5000,
+    },
+    retries: 3,
+    workers: 3,
+    reporter: 'html',
+    projects: [
+        ...
+    ],
+};
+
+```
+
+> By default `Playwright` users 5 `workers`
+
+#### Same Test Suite
+
+```JavaScript
+test.describe.configure({ mode: 'parallel' });
+```
+
+> `mode: 'serial'` will run all the tests in sequence, but if one of them fail, then the rest of the tests are skipped
+
+---
+
+### Tags
+
+- [Playwright Tags](https://playwright.dev/docs/test-annotations#tag-tests)
+
+```Bash
+npx playwright test --grep @yourTagName
+```
+
+```JavaScript
+import { test, expect } from '@playwright/test';
+
+test('Test login page @fast', async ({ page }) => {
+  // ...
+});
+
+test('Test full report @slow', async ({ page }) => {
+  // ...
+});
+```
+
+---
+
+### Reports
+
+- [Playwright Reports](https://playwright.dev/docs/test-reporters)
+
+![](/assets/images/2023-01-12-20-15-08.png)
+
+#### Allure Report Plugin
+
+Install packages
+
+```Bash
+npm i -D @playwright/test allure-playwright
+npm install -g allure-commandline
+```
+
+Run tests, change reporter type `line`
+
+```Bash
+npx playwright test Api1.spec.js --project Firefox --reporter=line,allure-playwright
+```
+
+Generate allure report from `./allure-results` folder
+
+```Bash
+allure generate ./allure-results --clean
+```
+
+Run `allure` server
+
+```Bash
+allure open ./allure-report
+```
+
+![](/assets/images/2023-01-12-20-26-34.png)
+
+#### Traces
+
+- [Playwright Traces](https://playwright.dev/docs/trace-viewer-intro)
+
+To preview and inspect a trace.
+
+![](/assets/images/2023-01-11-12-11-16.png)
+
+![](/assets/images/2023-01-11-12-19-57.png)
+
+![](/assets/images/2023-01-11-12-16-41.png)
 
 ## Run tests
 
@@ -1185,14 +1305,49 @@ test('test', async ({ page }) => {
 });
 ```
 
-### Traces
+## Jenkins
 
-- [Playwright Traces](https://playwright.dev/docs/trace-viewer-intro)
+- [Jenkins Download](https://www.jenkins.io/download/)
 
-To preview and inspect a trace.
+- Install the latest LTS version: `brew install jenkins-lts`
+- Install a specific LTS version: `brew install jenkins-lts@YOUR_VERSION`
+- Start the Jenkins service: `brew services start jenkins-lts`
+- Stop the Jenkins service: `brew services stop jenkins-lts`
+- Restart the Jenkins service: `brew services restart jenkins-lts`
+- Update the Jenkins version: `brew upgrade jenkins-lts`
 
-![](/assets/images/2023-01-11-12-11-16.png)
+Run manually
 
-![](/assets/images/2023-01-11-12-19-57.png)
+```Bash
+/opt/homebrew/opt/openjdk@17/bin/java -Dmail.smtp.starttls.enable=true -jar /opt/homebrew/opt/jenkins-lts/libexec/jenkins.war --httpListenAddress=127.0.0.1 --httpPort=8080
+```
 
-![](/assets/images/2023-01-11-12-16-41.png)
+### New Local Project
+
+![](/assets/images/2023-01-12-20-59-52.png)
+
+![](/assets/images/2023-01-12-21-00-39.png)
+
+![](/assets/images/2023-01-12-21-03-50.png)
+
+![](/assets/images/2023-01-12-21-06-18.png)
+
+![](/assets/images/2023-01-12-21-07-10.png)
+
+![](/assets/images/2023-01-12-21-10-43.png)
+
+![](/assets/images/2023-01-12-21-11-32.png)
+
+### Dynamically Run Script
+
+![](/assets/images/2023-01-12-21-25-40.png)
+
+![](/assets/images/2023-01-12-21-27-06.png)
+
+![](/assets/images/2023-01-12-21-31-40.png)
+
+![](/assets/images/2023-01-12-21-32-14.png)
+
+![](/assets/images/2023-01-12-21-32-39.png)
+
+![](/assets/images/2023-01-12-21-32-51.png)

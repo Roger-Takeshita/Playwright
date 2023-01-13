@@ -130,3 +130,5 @@ dist
 .pnp.*
 storageState.json
 **/downloads
+**/allure-results
+**/allure-report
