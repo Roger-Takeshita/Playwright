@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "playwright test",
+        "test": "playwright test --project=Chrome",
         "chrome": "playwright test --project=Chrome",
         "firefox": "playwright test --project=Firefox",
         "safari": "playwright test --config=playwright.config.safari.js --project=Safari"

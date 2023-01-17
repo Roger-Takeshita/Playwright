@@ -19,8 +19,10 @@ const readJSON = async (filePath) => {
     }
 };
 
-const saveFile = async (filePath, text) => {
+const saveFile = async (filePath, text, clear = false) => {
     try {
+        const fileExist = await fileExists(filePath);
+        if (clear && fileExist) await fs.promises.unlink(filePath);
         await fs.promises.writeFile(filePath, text);
         return true;
     } catch (error) {
@@ -35,7 +37,7 @@ const toSnakeCase = (str) =>
         .map((x) => x.toLowerCase())
         .join('_');
 
-test('API - Snapshot Should Pass', async ({ }, testInfo) => {
+test('API - Snapshot Should Pass', async ({}, testInfo) => {
     const url = 'https://swapi.dev/api/people/1';
 
     const apiContext = await request.newContext();
@@ -59,7 +61,7 @@ test('API - Snapshot Should Pass', async ({ }, testInfo) => {
     }
 });
 
-test('API - Snapshot Should Fail', async ({ }, testInfo) => {
+test('API - Snapshot Should Fail', async ({}, testInfo) => {
     const url = 'https://swapi.dev/api/people/1';
 
     const apiContext = await request.newContext();
@@ -73,7 +75,40 @@ test('API - Snapshot Should Fail', async ({ }, testInfo) => {
 
     if (fileExist) {
         const rawData = await readJSON(filePath);
-        rawData.wrongData = 'Fake Wrong Data';
+        response.wrongData = 'Fake Wrong Data';
+        expect(JSON.stringify(response, undefined, 2)).not.toBe(JSON.stringify(rawData, undefined, 2));
+        expect(JSON.stringify(response, undefined, 2)).toBe(JSON.stringify(rawData, undefined, 2));
+        console.log('\n  Same snapshot\n');
+    } else {
+        const folderExist = await fileExists(dir);
+        if (!folderExist) await fs.promises.mkdir(dir, { recursive: true });
+        await saveFile(filePath, JSON.stringify(response, undefined, 2));
+        console.log('\n  Saved new snapshot\n');
+    }
+});
+
+test('API - Snapshot Update Test Snapshot', async ({}, testInfo) => {
+    // UPDATE=true npm test Api4.spec.js
+    const url = 'https://swapi.dev/api/people/1';
+
+    const apiContext = await request.newContext();
+    const rawResponse = await apiContext.get(url);
+    const response = await rawResponse.json();
+
+    const dir = '/Users/roger-that/Documents/Codes/Playwright/001_playwright_js_automation/tests/JSON';
+    const filePath = `${dir}/${toSnakeCase(testInfo.title)}.json`;
+
+    const fileExist = await fileExists(filePath);
+
+    if (fileExist) {
+        let rawData = await readJSON(filePath);
+        response.wrongData = 'Fake Wrong Data';
+
+        if (process.env.UPDATE) {
+            console.log('  Updating snapshot...');
+            await saveFile(filePath, JSON.stringify(response, undefined, 2), true);
+            rawData = await readJSON(filePath);
+        }
         expect(JSON.stringify(response, undefined, 2)).toBe(JSON.stringify(rawData, undefined, 2));
         console.log('\n  Same snapshot\n');
     } else {
