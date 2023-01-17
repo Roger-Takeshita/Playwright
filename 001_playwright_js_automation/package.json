@@ -4,10 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "npx playwright test",
-        "chrome": "npx playwright test --project=Chrome",
-        "firefox": "npx playwright test --project=Firefox",
-        "safari": "npx playwright test --config=playwright.config.safari.js --project=Safari"
+        "test": "playwright test",
+        "chrome": "playwright test --project=Chrome",
+        "firefox": "playwright test --project=Firefox",
+        "safari": "playwright test --config=playwright.config.safari.js --project=Safari"
     },
     "keywords": [],
     "author": "",

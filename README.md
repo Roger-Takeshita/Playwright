@@ -416,7 +416,10 @@ Using VSCode we need to update the `package.json` to include a generic test scri
 
 ```JSON
 "scripts": {
-    "test": "npx playwright test"
+    "test": "npx playwright test",
+    "chrome": "npx playwright test --project=Chrome",
+    "firefox": "npx playwright test --project=Firefox",
+    "safari": "npx playwright test --config=playwright.config.safari.js --project=Safari"
 },
 ```
 
@@ -436,7 +439,7 @@ Create/Add two new config to your `launch.json` debugger file
             "skipFiles": ["<node_internals>/**"],
             "program": "${workspaceFolder}/tests/Api2.spec.js",
             "runtimeExecutable": "npm",
-            "runtimeArgs": ["run-script", "test"],
+            "runtimeArgs": ["run-script", "chrome"],
             "args": ["--headed"]
         },
         {
@@ -446,7 +449,7 @@ Create/Add two new config to your `launch.json` debugger file
             "skipFiles": ["<node_internals>/**"],
             "program": "${workspaceFolder}/tests/Api2.spec.js",
             "runtimeExecutable": "npm",
-            "runtimeArgs": ["run-script", "test"],
+            "runtimeArgs": ["run-script", "chrome"],
             "args": []
         }
     ]

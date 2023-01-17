@@ -1,0 +1,22 @@
+{
+    "configurations": {
+        "Playwrite": {
+            "adapter": "vscode-node",
+            "breakpoints": {
+                "exception": {
+                    "all": "N",
+                    "uncaught": "N"
+                }
+            },
+            "skipFiles": ["<node_internals>/**/*.js"],
+            "configuration": {
+                "request": "launch",
+                "type": "node",
+                "protocol": "auto",
+                "console": "integratedTerminal",
+                "runtimeExecutable": "npm",
+                "runtimeArgs": ["run-script", "chrome", "${workspaceFolder}/tests/Api2.spec.js"]
+            }
+        }
+    }
+}
